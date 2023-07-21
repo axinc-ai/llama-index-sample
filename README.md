@@ -4,10 +4,18 @@
 
 - OpenAI API key
 - python 3.8 and later
-- llama-index
+- llama-index (0.6.38.post1)
+
+## Install
 
 ```
 pip3 install llama-index
+```
+
+## Set API key
+
+```
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
 
 ## Create index

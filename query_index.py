@@ -1,14 +1,37 @@
-import os
-os.environ["OPENAI_API_KEY"] = 'YOUR_OPENAI_API_KEY'
+﻿import sys
+import time
 
-from llama_index import GPTSimpleVectorIndex, LLMPredictor
-from langchain import OpenAI
+from llama_index import VectorStoreIndex
+from llama_index import StorageContext, load_index_from_storage
 
-query_text ="ailia SDKが対応しているOSを教えてください。"
+# for debug
+import langchain
+langchain.verbose = True
 
-llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=350))
-index = GPTSimpleVectorIndex.load_from_disk('index.json')
-response = index.query(query_text, llm_predictor=llm_predictor)
+# open index
+start = int(round(time.time() * 1000))
+storage_context = StorageContext.from_defaults(persist_dir='./storage')
+loaded_index = load_index_from_storage(storage_context)
+end = int(round(time.time() * 1000))
+print(f'\tfrom_defaults processing time {end - start} ms')
 
-print("Q:", query_text)
-print("A:", str(response))
+args = sys.argv
+if len(args) >= 2:
+	question = args[1]
+else:
+	question = "ailia SDKが対応しているOSを教えてください。"
+
+start = int(round(time.time() * 1000))
+query_engine = loaded_index.as_query_engine(
+    similarity_top_k=1
+)
+end = int(round(time.time() * 1000))
+print(f'\tquery_engine processing time {end - start} ms')
+
+start = int(round(time.time() * 1000))
+output = query_engine.query(question)
+print("Q: "+ question)
+print("A: ", end="")
+print(output)
+end = int(round(time.time() * 1000))
+print(f'\tquery processing time {end - start} ms')
